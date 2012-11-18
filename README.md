@@ -15,8 +15,8 @@ Usage
 This activity was developed with ease of use in mind. 
 
 Just fire the app and point the XO camera to QR target and Cuadraditos will
-automatically save the decoded URL on the clipboard to be opened in the browser
-by the user.
+automatically detect the decoded URL and open it in the default browser. 
+If the decoded text is not a URL it will display it on Write activity.
 
 Authors
 =======
@@ -36,3 +36,5 @@ Thanks
 ======
 * Cecilia Norman, Uruguay
 * Ceibal Jam Comunity
+* Agustin Zuasbiaga (OLPC developer)
+* Daniel S. Francis (OLPC developer)

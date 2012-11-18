@@ -1,6 +1,6 @@
 [Activity]
 name = Cuadraditos
-activity_version = 1
+activity_version = 2 
 service_name = org.laptop.Cuadraditos
 exec = Cuadraditos.sh
 icon = activity-cuadraditos

@@ -27,6 +27,8 @@ import logging
 from constants import Constants
 import aplay
 import urlparse
+from sugar.graphics.alert import ConfirmationAlert, TimeoutAlert
+
 
 logger = logging.getLogger('cuadraditos:capture.py')
 
@@ -70,10 +72,10 @@ class Capture:
                                    'prospero', 'rsync', 'rtsp', 'rtspu',
                                    'sftp', 'shttp', 'sip', 'sips', 'snews',
                                    'svn', 'svn+ssh', 'telnet', 'wais']
-    
+
         self.pipeline = gst.Pipeline("my-pipeline")
         self.createPipeline()
-    
+
         self.last_barcode = None
         bus = self.pipeline.get_bus()
         bus.enable_sync_message_emission()
@@ -149,6 +151,9 @@ class Capture:
                                       self.last_barcode)
         return True
 
+    def _alert_response_cb(self, alert, response_id):
+        self.ca.remove_alert(alert)
+
     def _onMessageCb(self, bus, message):
         t = message.type
         if t == gst.MESSAGE_EOS:
@@ -159,19 +164,35 @@ class Capture:
         elif t == gst.MESSAGE_ELEMENT:
             s = message.structure
             if s.has_name("barcode"):
-                #self.__class__.log.error('We found one! :)  (%s)' %\
-                #                         (s['symbol']))
+                self.stop()
+                self.window.hide()
+                aplay.play(Constants.sound_click)
+                self.last_barcode = s['symbol']
                 parsedurl = urlparse.urlparse(s['symbol'])
                 if parsedurl.scheme in self.recognized_schemes:
-                    self.stop()
-                    self.window.hide()
-                    self.last_barcode = s['symbol']
-                    aplay.play(Constants.sound_click)
+                    alert = TimeoutAlert(60)
+                    alert.remove_button(gtk.RESPONSE_CANCEL)
+                    alert.props.title = 'Direccion detectada!'
+                    alert.props.msg = ''.\
+                                        join([
+                                              'La direccion fue copiada en ',
+                                              'el portatapeles. Acceda al ',
+                                              'marco de Sugar y abrala en el ',
+                                              'navegador haciendo click en ',
+                                              'ella'])
+                    alert.connect('response', self._alert_response_cb)
+                    self.ca.add_alert(alert)
                     self._copyToClipboard()
+                    self.ca.alert.show()
                 else:
-                    #todo: show plain text in Cuadraditos, give the possibility
-                    #to save to Diary
-                    pass
+                    alert = ConfirmationAlert()
+                    alert.remove_button(gtk.RESPONSE_CANCEL)
+                    alert.props.title = 'Texto detectado:'
+                    alert.props.msg = s['symbol']
+                    alert.connect('response', self._alert_response_cb)
+                    self.ca.add_alert(alert)
+                    self.ca.alert.show()
+
         elif t == gst.MESSAGE_ERROR:
             #todo: if we come out of suspend/resume with errors, then get us
             #      back up and running...
