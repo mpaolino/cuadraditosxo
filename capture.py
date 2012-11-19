@@ -76,7 +76,7 @@ class Capture:
         self.pipeline = gst.Pipeline("my-pipeline")
         self.createPipeline()
 
-        self.last_barcode = None
+        self.last_detection = None
         bus = self.pipeline.get_bus()
         bus.enable_sync_message_emission()
         bus.add_signal_watch()
@@ -144,14 +144,19 @@ class Capture:
     def _clipboardClearFuncCb(self, clipboard, data):
         pass
 
-    def _copyToClipboard(self):
+    def _copyURIToClipboard(self):
         gtk.Clipboard().set_with_data([('text/uri-list', 0, 0)],
                                       self._clipboardGetFuncCb,
                                       self._clipboardClearFuncCb,
-                                      self.last_barcode)
+                                      self.last_detection)
         return True
 
-    def _alert_response_cb(self, alert, response_id):
+    def _alert_uri_response_cb(self, alert, response_id):
+        self.ca.remove_alert(alert)
+
+    def _alert_text_response_cb(self, alert, response_id):
+        if response_id is gtk.RESPONSE_OK:
+            gtk.Clipboard().set_text(self.last_detection)
         self.ca.remove_alert(alert)
 
     def _onMessageCb(self, bus, message):
@@ -167,29 +172,26 @@ class Capture:
                 self.stop()
                 self.window.hide()
                 aplay.play(Constants.sound_click)
-                self.last_barcode = s['symbol']
+                self.last_detection = s['symbol']
                 parsedurl = urlparse.urlparse(s['symbol'])
                 if parsedurl.scheme in self.recognized_schemes:
                     alert = TimeoutAlert(60)
                     alert.remove_button(gtk.RESPONSE_CANCEL)
                     alert.props.title = 'Direccion detectada!'
-                    alert.props.msg = ''.\
-                                        join([
-                                              'La direccion fue copiada en ',
-                                              'el portatapeles. Acceda al ',
-                                              'marco de Sugar y abrala en el ',
-                                              'navegador haciendo click en ',
-                                              'ella'])
-                    alert.connect('response', self._alert_response_cb)
+                    alert.props.msg = 'La direccion fue copiada en ' +\
+                                      'el portatapeles. Acceda al ' +\
+                                      'marco de Sugar y abrala en el ' +\
+                                      'navegador haciendo click en ella'
+                    alert.connect('response', self._alert_uri_response_cb)
                     self.ca.add_alert(alert)
-                    self._copyToClipboard()
+                    self._copyURIToClipboard()
                     self.ca.alert.show()
                 else:
                     alert = ConfirmationAlert()
-                    alert.remove_button(gtk.RESPONSE_CANCEL)
-                    alert.props.title = 'Texto detectado:'
+                    alert.props.title = 'Texto detectado. ' +\
+                                        '¿Desea copiarlo al portapapeles?'
                     alert.props.msg = s['symbol']
-                    alert.connect('response', self._alert_response_cb)
+                    alert.connect('response', self._alert_text_response_cb)
                     self.ca.add_alert(alert)
                     self.ca.alert.show()
 

@@ -35,8 +35,6 @@ class UI:
 
     log = logging.getLogger('cuadraditos-ui')
 
-    #dim_INSET = 10
-
     def __init__(self, pca):
         self.ca = pca
         # listen for ctrl+c & escape key
@@ -100,35 +98,24 @@ class UI:
 
     def _mapEventCb(self, widget, event):
         #when your parent window is ready, turn on the feed of live video
-        self.__class__.log.error('Invocado _mapEventCb')
         self.capture_window.disconnect(self.MAP_EVENT_ID)
         self.mapped = True
         self.set_up()
 
     def set_up(self):
-        self.__class__.log.error('Invocado setup')
         if (self.mapped and not self.setup):
-
-            self.__class__.log.error('Realizando setup')
-
             self.setup = True
-
             gobject.idle_add(self.final_setup)
 
     def final_setup(self):
-        self.__class__.log.error('Invocado finalSetup')
         self.LAUNCHING = False
         self.ACTIVE = self.ca.get_property("visible")
         self.update_video_components()
 
         if (self.ACTIVE):
-            self.__class__.log.error('Por invocar play en self.ca.capture')
             self.ca.capture.play()
 
-        self.debug_windows()
-
     def setup_windows(self):
-        self.__class__.log.error('Invocado setup_windows')
         self.window_stack = []
 
         self.capture_window = LiveCaptureWindow(Constants.color_black.gColor)
@@ -146,7 +133,6 @@ class UI:
         self.MAP_EVENT_ID = self.capture_window.connect_after("map-event",
                                                               self._mapEventCb)
         for i in range(0, len(self.window_stack)):
-            self.__class__.log.error('Por invocar show_all en ventana')
             self.window_stack[i].show_all()
 
     def _visible_notify_cb(self, widget, event):
@@ -197,7 +183,6 @@ class UI:
         self.ca.close()
 
     def hide_all_windows(self):
-        self.__class__.log.error('Invocado hide_all_windows')
         for i in range(0, len(self.window_stack)):
             self.window_stack[i].hide_all()
 
@@ -211,7 +196,6 @@ class UI:
         self.update_video_components()
 
     def start_live_video(self, force):
-        self.__class__.log.error('Invocado start_live_video')
         # We need to know which window and which pipe here
 
         # if returning from another activity, active won't be false and needs
@@ -223,7 +207,6 @@ class UI:
             return
 
         self.ca.m.set_updating(True)
-        self.__class__.log.error('Seteando pantalla de captura y dandole play')
         self.capture_window.set_capture(self.ca.capture)
         self.ca.capture.play()
         self.ca.m.set_updating(False)
@@ -254,7 +237,6 @@ class UI:
         return [gtk.gdk.screen_width(), self.toolbox_ht]
 
     def update_video_components(self):
-        self.__class__.log.error('Invocado update_video_components')
         pos = []
         pos.append({"position": "capture", "window": self.capture_window})
         self.hide_all_windows()
@@ -262,7 +244,6 @@ class UI:
         self.set_capture_loc_dim(self.capture_window)
 
         for i in range(0, len(self.window_stack)):
-            self.__class__.log.error('Invocando show_all en ventana')
             self.window_stack[i].show_all()
 
     def debug_windows(self):
