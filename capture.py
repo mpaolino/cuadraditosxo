@@ -178,10 +178,10 @@ class Capture:
                     alert = TimeoutAlert(60)
                     alert.remove_button(gtk.RESPONSE_CANCEL)
                     alert.props.title = 'Direccion detectada!'
-                    alert.props.msg = 'La direccion fue copiada en ' +\
-                                      'el portatapeles. Acceda al ' +\
-                                      'marco de Sugar y abrala en el ' +\
-                                      'navegador haciendo click en ella'
+                    alert.props.msg = 'La dirección fue copiada al ' +\
+                                      'portatapeles. Acceda al ' +\
+                                      'marco de Sugar y haga click sobre ' +\
+                                      'ella para abrirla en el navegador.'
                     alert.connect('response', self._alert_uri_response_cb)
                     self.ca.add_alert(alert)
                     self._copyURIToClipboard()
