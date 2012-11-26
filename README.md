@@ -15,8 +15,14 @@ Usage
 This activity was developed with ease of use in mind. 
 
 Just fire the app and point the XO camera to QR target and Cuadraditos will
-automatically detect the decoded URL and open it in the default browser. 
-If the decoded text is not a URL it will display it on Write activity.
+automatically decode it. Right now it only detects two kind of data, URLs
+and text.
+
+There is still no official way of running an activity from another activity,
+so the interaction between the browser and Cuadraditos is done through the
+clipboard.
+Text is displayed in the activity and gives the user the chance to copy
+it to the clipboard. URLs are automatically copied to the clipboard.
 
 Authors
 =======
